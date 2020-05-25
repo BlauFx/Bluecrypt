@@ -10,8 +10,7 @@ namespace Encryption
     internal class Program
     {
         private static readonly byte[] buffer = new byte[short.MaxValue];
-        private static readonly int byteSize = ushort.MaxValue;
-        private static readonly byte[] salt = new byte[byteSize];
+        private static readonly byte[] salt = new byte[ushort.MaxValue];
         private static readonly int Iterations = 70000;
         private static int Read = 0;
 
