@@ -9,15 +9,14 @@ namespace Encryption
 {
     internal class Program
     {
-        private static readonly byte[] buffer = new byte[short.MaxValue];
-        private static readonly byte[] salt = new byte[ushort.MaxValue];
+        private static readonly byte[] buffer = new byte[short.MaxValue], salt = new byte[ushort.MaxValue];
         private static readonly int Iterations = 70000;
         private static int Read = 0;
 
         private static void Main()
         {
             Console.Write("Password: ");
-            string password = Console.ReadLine();
+            string password = GetPassword();
 
             Console.Write("Do you wanna encrypt or decrypt?\n1: Encrypt \n2: Decrypt\nInput: ");
             string input = Console.ReadLine();
@@ -33,9 +32,7 @@ namespace Encryption
                 DecryptFile(inputfile, Console.ReadLine(), password);
             }
 
-            password = null;
-            Console.WriteLine("Password: " + password);
-
+            Console.WriteLine("Done");
             Console.ReadLine();
         }
 
@@ -99,6 +96,38 @@ namespace Encryption
             aes.Key = mykey.GetBytes(aes.KeySize / 8);
             aes.IV = mykey.GetBytes(aes.BlockSize / 8);
             aes.Mode = CipherMode.CBC;
+        }
+
+        public static string GetPassword()
+        {
+            string password = "";
+            ConsoleKeyInfo info = Console.ReadKey(true);
+
+            while (info.Key != ConsoleKey.Enter)
+            {
+                if (info.Key != ConsoleKey.Backspace)
+                {
+                    Console.Write("*");
+                    password += info.KeyChar;
+                }
+                else if (info.Key == ConsoleKey.Backspace)
+                {
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        password = password[0..^1];
+                        int pos = Console.CursorLeft;
+
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                        Console.Write(" ");
+
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                    }
+                }
+                info = Console.ReadKey(true);
+            }
+
+            Console.WriteLine();
+            return password;
         }
     }
 }
