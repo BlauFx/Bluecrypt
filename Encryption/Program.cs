@@ -41,7 +41,7 @@ namespace Encryption
                 for (int i = 0; i < 10; i++)
                     rng.GetBytes(salt);
 
-            Rfc2898DeriveBytes mykey = new Rfc2898DeriveBytes(Encoding.UTF8.GetBytes(password), salt, Iterations);
+            Rfc2898DeriveBytes mykey = GetKey(password);
 
             using (Aes aes = Aes.Create())
             using (FileStream fsIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -62,7 +62,7 @@ namespace Encryption
             fsCrypt.Read(salt, 0, salt.Length);
 
             string Driveletter = outputFile[0..(outputFile.IndexOf(@"\") + 1)];
-            var OSDrive = DriveInfo.GetDrives().Where(x => x.IsReady && x.Name.Equals(Driveletter, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            var OSDrive = DriveInfo.GetDrives().FirstOrDefault(x => x.IsReady && x.Name.Equals(Driveletter, StringComparison.OrdinalIgnoreCase));
             
             if (OSDrive.AvailableFreeSpace < fsCrypt.Length * 1.5)
             {
@@ -73,7 +73,7 @@ namespace Encryption
                 Environment.Exit(0);
             }
 
-            Rfc2898DeriveBytes mykey = new Rfc2898DeriveBytes(Encoding.UTF8.GetBytes(password), salt, Iterations);
+            Rfc2898DeriveBytes mykey = GetKey(password);
             using (Aes aes = Aes.Create())
             {
                 AddParametersToAes(aes, mykey);
@@ -96,6 +96,8 @@ namespace Encryption
             aes.IV = mykey.GetBytes(aes.BlockSize / 8);
             aes.Mode = CipherMode.CBC;
         }
+
+        private static Rfc2898DeriveBytes GetKey (string password) => new Rfc2898DeriveBytes(Encoding.UTF8.GetBytes(password), salt, Iterations, HashAlgorithmName.SHA256);
 
         public static string GetPassword()
         {
