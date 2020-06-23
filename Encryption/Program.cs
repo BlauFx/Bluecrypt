@@ -10,7 +10,7 @@ namespace Encryption
     {
         private static readonly byte[] buffer = new byte[short.MaxValue], salt = new byte[ushort.MaxValue];
         private static readonly int Iterations = 70000;
-        private static int Read = 0;
+        private static int Read;
 
         private static void Main()
         {
@@ -31,7 +31,7 @@ namespace Encryption
                 DecryptFile(inputfile, Console.ReadLine(), password);
             }
 
-            Console.WriteLine("Done");
+            Console.WriteLine("Done\nOperation completed\nAlgorithm: AES\nKeysize: 256 bits\nCipherMode: CBC\nPadding: PKCS7");
             Console.ReadLine();
         }
 
