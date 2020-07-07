@@ -42,7 +42,7 @@ namespace Encryption
                 DecryptFile(inputfile, Console.ReadLine(), password);
             }
 
-            Console.WriteLine("Done\nOperation completed\nAlgorithm: AES\nKeysize: 256 bits\nCipherMode: CBC\nPadding: PKCS7");
+            Console.WriteLine("Done, operation completed\nAlgorithm: AES\nKeysize: 256 bits\nCipherMode: CBC\nPadding: PKCS7");
             Console.ReadLine();
         }
 
@@ -75,7 +75,7 @@ namespace Encryption
 
             string Driveletter = outputFile[0..(outputFile.IndexOf(@"\") + 1)];
             var OSDrive = DriveInfo.GetDrives().FirstOrDefault(x => x.IsReady && x.Name.Equals(Driveletter, StringComparison.OrdinalIgnoreCase));
-            
+
             if (OSDrive.AvailableFreeSpace < fsCrypt.Length * 1.5)
             {
                 fsCrypt.Close();
