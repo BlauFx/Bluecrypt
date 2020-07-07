@@ -17,6 +17,17 @@ namespace Encryption
             Console.Write("Password: ");
             string password = GetPassword();
 
+            Console.Write("Confirm password: ");
+            string password2 = GetPassword();
+
+            while (!password.Equals(password2))
+            {
+                Console.WriteLine("Wrong password\nRetry again\nConfirm password: ");
+                password2 = GetPassword();
+            }
+
+            Console.Clear();
+
             Console.Write("Do you wanna encrypt or decrypt?\n1: Encrypt \n2: Decrypt\nInput: ");
             string input = Console.ReadLine();
 
@@ -53,6 +64,7 @@ namespace Encryption
                 using (CryptoStream crypto = new CryptoStream(fsCrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
                     while ((Read = fsIn.Read(buffer, 0, buffer.Length)) > 0)
                         crypto.Write(buffer, 0, Read);
+
             }
         }
 
