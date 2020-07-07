@@ -64,7 +64,6 @@ namespace Encryption
                 using (CryptoStream crypto = new CryptoStream(fsCrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
                     while ((Read = fsIn.Read(buffer, 0, buffer.Length)) > 0)
                         crypto.Write(buffer, 0, Read);
-
             }
         }
 
