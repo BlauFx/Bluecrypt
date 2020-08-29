@@ -34,6 +34,8 @@ namespace Encryption
             Console.Write("Inputfile: ");
             string inputfile = Console.ReadLine();
 
+            EnsureFileExist(ref inputfile);
+
             if (input == "1")
                 EncryptFile(inputfile, password);
             else if (input == "2")
@@ -110,7 +112,22 @@ namespace Encryption
 
         private static Rfc2898DeriveBytes GetKey (string password) => new Rfc2898DeriveBytes(Encoding.UTF8.GetBytes(password), salt, Iterations, HashAlgorithmName.SHA256);
 
-        public static string GetPassword()
+        private static void EnsureFileExist(ref string inputfile)
+        {
+            if (inputfile is null)
+                throw new Exception("Operation aborted!\nInputfile can't be null!");
+
+            if (inputfile.StartsWith("\""))
+                inputfile = inputfile[1..];
+
+            if (inputfile.EndsWith("\""))
+                inputfile = inputfile[..^1];
+
+            if (!File.Exists(inputfile))
+                throw new FileNotFoundException($"Operation aborted!\nFile does not exist!\nCouldn't find: {inputfile}");
+        }
+
+        private static string GetPassword()
         {
             string password = "";
             ConsoleKeyInfo info = Console.ReadKey(true);
