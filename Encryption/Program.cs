@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -58,7 +57,7 @@ namespace Encryption
 
             using (Aes aes = Aes.Create())
             using (FileStream fsIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
-            using (FileStream fsCrypt = new FileStream(inputFile + ".encrypted", FileMode.Create))
+            using (FileStream fsCrypt = new FileStream($"{inputFile}.encrypted", FileMode.Create))
             {
                 AddParametersToAes(aes, mykey);
                 fsCrypt.Write(salt, 0, salt.Length);
@@ -74,13 +73,12 @@ namespace Encryption
             using FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
             fsCrypt.Read(salt, 0, salt.Length);
 
-            string Driveletter = outputFile[0..(outputFile.IndexOf(@"\") + 1)];
-            var OSDrive = DriveInfo.GetDrives().FirstOrDefault(x => x.IsReady && x.Name.Equals(Driveletter, StringComparison.OrdinalIgnoreCase));
+            DriveInfo OSDrive = new DriveInfo(Path.GetPathRoot(new FileInfo(outputFile).FullName) ?? throw new Exception($"{outputFile} could not be found"));
 
             if (OSDrive.AvailableFreeSpace < fsCrypt.Length * 1.5)
             {
                 fsCrypt.Close();
-                Console.WriteLine("Not enough space to do this operation!");
+                Console.WriteLine("Not enough space available to do this operation!");
 
                 Console.ReadLine();
                 Environment.Exit(0);
@@ -117,10 +115,10 @@ namespace Encryption
             if (inputfile is null)
                 throw new Exception("Operation aborted!\nInputfile can't be null!");
 
-            if (inputfile.StartsWith("\""))
+            if (inputfile.StartsWith("\"") || inputfile.StartsWith("\'"))
                 inputfile = inputfile[1..];
 
-            if (inputfile.EndsWith("\""))
+            if (inputfile.EndsWith("\"") || inputfile.EndsWith("\'"))
                 inputfile = inputfile[..^1];
 
             if (!File.Exists(inputfile))
