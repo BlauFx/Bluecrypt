@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <ApplicationIcon>BlauFx.ico</ApplicationIcon>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
