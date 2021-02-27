@@ -49,6 +49,8 @@ namespace Encryption
 
         private static void EncryptFile(string inputFile, string password)
         {
+            CheckIfEnoughStorageIsAvailable(inputFile);
+
             using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
                 for (int i = 0; i < 10; i++)
                     rng.GetBytes(salt);
@@ -70,19 +72,10 @@ namespace Encryption
 
         private static void DecryptFile(string inputFile, string outputFile, string password)
         {
+            CheckIfEnoughStorageIsAvailable(outputFile);
+
             using FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
             fsCrypt.Read(salt, 0, salt.Length);
-
-            DriveInfo OSDrive = new DriveInfo(Path.GetPathRoot(new FileInfo(outputFile).FullName) ?? throw new Exception($"{outputFile} could not be found"));
-
-            if (OSDrive.AvailableFreeSpace < fsCrypt.Length * 1.5)
-            {
-                fsCrypt.Close();
-                Console.WriteLine("Not enough space available to do this operation!");
-
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
 
             Rfc2898DeriveBytes mykey = GetKey(password);
             using (Aes aes = Aes.Create())
@@ -123,6 +116,19 @@ namespace Encryption
 
             if (!File.Exists(inputfile))
                 throw new FileNotFoundException($"Operation aborted!\nFile does not exist!\nCouldn't find: {inputfile}");
+        }
+
+        private static void CheckIfEnoughStorageIsAvailable(string file)
+        {
+            DriveInfo osDrive = new DriveInfo(Path.GetPathRoot(new FileInfo(file).FullName) ?? throw new Exception($"{file} could not be found"));
+            using var fileStrm = new FileStream(file, FileMode.Open);
+
+            if (osDrive.AvailableFreeSpace < fileStrm.Length * 1.5)
+            {
+                Console.WriteLine("Not enough space available to perform this operation!");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
         }
 
         private static string GetPassword()
