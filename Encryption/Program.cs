@@ -75,10 +75,10 @@ namespace Encryption
 
         private static void DecryptFile(string inputFile, string outputFile, string password)
         {
+            CheckIfEnoughStorageIsAvailable(inputFile, outputFile);
+
             using FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
             fsCrypt.Read(salt, 0, salt.Length);
-
-            CheckIfEnoughStorageIsAvailable(inputFile, outputFile);
 
             Rfc2898DeriveBytes mykey = GetKey(password);
             AddParametersToAes(Aes, mykey);
@@ -120,7 +120,7 @@ namespace Encryption
 
         private static void CheckIfEnoughStorageIsAvailable(string input, string destinationDrive)
         {
-            DriveInfo osDrive = new DriveInfo(Path.GetPathRoot(new FileInfo(destinationDrive).FullName) ?? throw new Exception($"{destinationDrive} could not be found"));
+            DriveInfo osDrive = new DriveInfo(new FileInfo(destinationDrive).DirectoryName ?? throw new Exception($"{destinationDrive} could not be found"));
             using var fileStrm = new FileStream(input, FileMode.Open);
 
             if (osDrive.AvailableFreeSpace < fileStrm.Length * 1.5)
