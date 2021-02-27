@@ -47,13 +47,13 @@ namespace Encryption
 
             Aes.Clear();
 
-            Console.WriteLine($"Done, operation completed\nAlgorithm: AES\nKeysize: {Aes.Key.Length}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
+            Console.WriteLine($"Done, operation completed\nAlgorithm: AES\nKeysize: {Aes.Key.Length*8}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
             Console.ReadLine();
         }
 
         private static void EncryptFile(string inputFile, string password)
         {
-            CheckIfEnoughStorageIsAvailable(inputFile);
+            CheckIfEnoughStorageIsAvailable(inputFile, inputFile);
 
             using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
                 for (int i = 0; i < 10; i++)
@@ -75,10 +75,10 @@ namespace Encryption
 
         private static void DecryptFile(string inputFile, string outputFile, string password)
         {
-            CheckIfEnoughStorageIsAvailable(outputFile);
-
             using FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
             fsCrypt.Read(salt, 0, salt.Length);
+
+            CheckIfEnoughStorageIsAvailable(inputFile, outputFile);
 
             Rfc2898DeriveBytes mykey = GetKey(password);
             AddParametersToAes(Aes, mykey);
@@ -118,10 +118,10 @@ namespace Encryption
                 throw new FileNotFoundException($"Operation aborted!\nFile does not exist!\nCouldn't find: {inputfile}");
         }
 
-        private static void CheckIfEnoughStorageIsAvailable(string file)
+        private static void CheckIfEnoughStorageIsAvailable(string input, string destinationDrive)
         {
-            DriveInfo osDrive = new DriveInfo(Path.GetPathRoot(new FileInfo(file).FullName) ?? throw new Exception($"{file} could not be found"));
-            using var fileStrm = new FileStream(file, FileMode.Open);
+            DriveInfo osDrive = new DriveInfo(Path.GetPathRoot(new FileInfo(destinationDrive).FullName) ?? throw new Exception($"{destinationDrive} could not be found"));
+            using var fileStrm = new FileStream(input, FileMode.Open);
 
             if (osDrive.AvailableFreeSpace < fileStrm.Length * 1.5)
             {
