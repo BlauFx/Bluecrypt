@@ -11,6 +11,8 @@ namespace Encryption
         private static readonly int Iterations = 70000;
         private static int Read;
 
+        private static Aes Aes = Aes.Create();
+
         private static void Main()
         {
             Console.Write("Password: ");
@@ -43,7 +45,9 @@ namespace Encryption
                 DecryptFile(inputfile, Console.ReadLine(), password);
             }
 
-            Console.WriteLine("Done, operation completed\nAlgorithm: AES\nKeysize: 256 bits\nCipherMode: CBC\nPadding: PKCS7");
+            Aes.Clear();
+
+            Console.WriteLine($"Done, operation completed\nAlgorithm: AES\nKeysize: {Aes.Key.Length}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
             Console.ReadLine();
         }
 
@@ -57,14 +61,13 @@ namespace Encryption
 
             Rfc2898DeriveBytes mykey = GetKey(password);
 
-            using (Aes aes = Aes.Create())
             using (FileStream fsIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
             using (FileStream fsCrypt = new FileStream($"{inputFile}.encrypted", FileMode.Create))
             {
-                AddParametersToAes(aes, mykey);
+                AddParametersToAes(Aes, mykey);
                 fsCrypt.Write(salt, 0, salt.Length);
 
-                using (CryptoStream crypto = new CryptoStream(fsCrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                using (CryptoStream crypto = new CryptoStream(fsCrypt, Aes.CreateEncryptor(), CryptoStreamMode.Write))
                     while ((Read = fsIn.Read(buffer, 0, buffer.Length)) > 0)
                         crypto.Write(buffer, 0, Read);
             }
@@ -78,16 +81,13 @@ namespace Encryption
             fsCrypt.Read(salt, 0, salt.Length);
 
             Rfc2898DeriveBytes mykey = GetKey(password);
-            using (Aes aes = Aes.Create())
-            {
-                AddParametersToAes(aes, mykey);
+            AddParametersToAes(Aes, mykey);
 
-                using (CryptoStream crypto = new CryptoStream(fsCrypt, aes.CreateDecryptor(), CryptoStreamMode.Read))
-                using (FileStream fsOut = new FileStream(outputFile, FileMode.Create))
-                {
-                    while ((Read = crypto.Read(buffer, 0, buffer.Length)) > 0)
-                        fsOut.Write(buffer, 0, Read);
-                }
+            using (CryptoStream crypto = new CryptoStream(fsCrypt, Aes.CreateDecryptor(), CryptoStreamMode.Read))
+            using (FileStream fsOut = new FileStream(outputFile, FileMode.Create))
+            {
+                while ((Read = crypto.Read(buffer, 0, buffer.Length)) > 0)
+                    fsOut.Write(buffer, 0, Read);
             }
         }
 
