@@ -111,8 +111,14 @@ namespace Encryption
             if (inputfile.StartsWith("\"") || inputfile.StartsWith("\'"))
                 inputfile = inputfile[1..];
 
+            if (!File.Exists(inputfile) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                inputfile = inputfile[..^1];
+            
             if (inputfile.EndsWith("\"") || inputfile.EndsWith("\'"))
                 inputfile = inputfile[..^1];
+
+            if (inputfile.Contains("\'\\\'"))
+                inputfile = inputfile.Replace("\'\\\'", "");
 
             if (!File.Exists(inputfile))
                 throw new FileNotFoundException($"Operation aborted!\nFile does not exist!\nCouldn't find: {inputfile}");
