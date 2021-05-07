@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -12,9 +14,51 @@ namespace Encryption
         private static int Read;
 
         private static Aes Aes = Aes.Create();
-
-        private static void Main()
+        private static bool UseHashChecker;
+        
+        private static void Main(string[] args)
         {
+            //Generate hash and save it in a text file.
+            if (args.Contains("--generate-hash"))
+            {
+                Console.Write("Password for hash: ");
+                string pw1 = GetPassword();
+                
+                Console.Write("Confirm password: ");
+                string pw2 = GetPassword();
+                
+                while (!pw1.Equals(pw2))
+                {
+                    Console.WriteLine("Wrong password\nRetry again\nConfirm password: ");
+                    pw2 = GetPassword();
+                }
+
+                string path = $"{AppDomain.CurrentDomain.BaseDirectory}{Path.DirectorySeparatorChar}passwordhashSHA512.txt";
+                if (File.Exists(path))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("passwordhashSHA512 exists already!\nDo you want to overwrite this file? (y/n): ");
+
+                    Console.ResetColor();
+                    string confirmation = Console.ReadLine();
+
+                    if (confirmation != null && confirmation.Contains("n"))
+                    {
+                        Console.WriteLine("Aborting...");
+                        Environment.Exit(0);
+                    }
+                }
+                
+                var hashGen = new StreamWriter(path);
+                hashGen.Write(CalcSha512(pw1));
+                hashGen.Close();
+                Console.Clear();
+
+                UseHashChecker = true;
+            }
+            else if (args.Contains("--hash"))
+                UseHashChecker = true;
+            
             Console.Write("Password: ");
             string password = GetPassword();
 
@@ -36,6 +80,7 @@ namespace Encryption
             string inputfile = Console.ReadLine();
 
             EnsureFileExist(ref inputfile);
+            CheckHash(password);
 
             if (input == "1")
                 EncryptFile(inputfile, password);
@@ -167,6 +212,67 @@ namespace Encryption
 
             Console.WriteLine();
             return password;
+        }
+
+        private static void CheckHash(string password)
+        {
+            if (!UseHashChecker)
+                return;
+
+            Console.Write("hash file (leave empty to skip): ");
+            string hashfile = Console.ReadLine();
+
+            if (!string.IsNullOrWhiteSpace(hashfile))
+                EnsureFileExist(ref hashfile);
+
+            if (File.Exists(hashfile))
+            {
+                var strm = new StreamReader(hashfile!);
+
+                if (CompareHash(CalcSha512(password), strm))
+                    return;
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Wrong password!!!\nComputed hash is not the same as provided in the file!!!\nAborting!!!");
+                Console.ResetColor();
+
+                throw new Exception("Wrong password or wrong hashfile provided.");
+            }
+
+            Console.Write("No hash file has been included. Do you still want to proceed? (y/n): ");
+            string userinput = Console.ReadLine()?.ToLower();
+
+            switch (userinput)
+            {
+                case "y":
+                    break;
+                case "n":
+                    throw new Exception("Aborted by user");
+                default:
+                    throw new Exception("Wrong input");
+            }
+        }
+        
+        private static string CalcSha512(string str)
+        {
+            using var sha = SHA512.Create();
+            var bytes = Encoding.UTF8.GetBytes(str);
+
+            var hashBytes = sha.ComputeHash(bytes);
+            var stringBuilder = new StringBuilder(512/8*2);
+
+            foreach (var b in hashBytes)
+                stringBuilder.Append(b.ToString("X2"));
+
+            var hash = stringBuilder.ToString();
+            return hash;
+        }
+
+        private static bool CompareHash(string hash, StreamReader strm)
+        {
+            var originalHash = strm.ReadLine();
+            strm.Close();
+            return originalHash != null && originalHash.Equals(hash);
         }
     }
 }
