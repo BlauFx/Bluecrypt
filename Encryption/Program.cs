@@ -20,56 +20,11 @@ namespace Encryption
         {
             //Generate hash and save it in a text file.
             if (args.Contains("--generate-hash"))
-            {
-                Console.Write("Password for hash: ");
-                string pw1 = GetPassword();
-                
-                Console.Write("Confirm password: ");
-                string pw2 = GetPassword();
-                
-                while (!pw1.Equals(pw2))
-                {
-                    Console.WriteLine("Wrong password\nRetry again\nConfirm password: ");
-                    pw2 = GetPassword();
-                }
-
-                string path = $"{AppDomain.CurrentDomain.BaseDirectory}{Path.DirectorySeparatorChar}passwordhashSHA512.txt";
-                if (File.Exists(path))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("passwordhashSHA512 exists already!\nDo you want to overwrite this file? (y/n): ");
-
-                    Console.ResetColor();
-                    string confirmation = Console.ReadLine();
-
-                    if (confirmation != null && confirmation.Contains("n"))
-                    {
-                        Console.WriteLine("Aborting...");
-                        Environment.Exit(0);
-                    }
-                }
-                
-                var hashGen = new StreamWriter(path);
-                hashGen.Write(CalcSha512(pw1));
-                hashGen.Close();
-                Console.Clear();
-
-                UseHashChecker = true;
-            }
+                GenerateHash();
             else if (args.Contains("--hash"))
                 UseHashChecker = true;
             
-            Console.Write("Password: ");
-            string password = GetPassword();
-
-            Console.Write("Confirm password: ");
-            string password2 = GetPassword();
-
-            while (!password.Equals(password2))
-            {
-                Console.WriteLine("Wrong password\nRetry again\nConfirm password: ");
-                password2 = GetPassword();
-            }
+            var password = GetAndVerifyPassword();
 
             Console.Clear();
 
@@ -273,6 +228,65 @@ namespace Encryption
             var originalHash = strm.ReadLine();
             strm.Close();
             return originalHash != null && originalHash.Equals(hash);
+        }
+
+        private static void GenerateHash()
+        {
+            Console.Write("Password for hash: ");
+            string pw1 = GetPassword();
+
+            Console.Write("Confirm password: ");
+            string pw2 = GetPassword();
+
+            while (!pw1.Equals(pw2))
+            {
+                Console.WriteLine("Wrong password\nRetry again\nConfirm password: ");
+                pw2 = GetPassword();
+            }
+
+            string path = $"{AppDomain.CurrentDomain.BaseDirectory}{Path.DirectorySeparatorChar}passwordhashSHA512.txt";
+            if (File.Exists(path))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("passwordhashSHA512 exists already!\nDo you want to overwrite this file? (y/n): ");
+
+                Console.ResetColor();
+                string confirmation = Console.ReadLine();
+
+                if (confirmation != null && confirmation.Contains("n"))
+                {
+                    Console.WriteLine("Aborting...");
+                    Environment.Exit(0);
+                }
+            }
+
+            var hashGen = new StreamWriter(path);
+            hashGen.Write(CalcSha512(pw1));
+            hashGen.Close();
+            Console.Clear();
+
+            UseHashChecker = true;
+        }
+
+        /// <summary>
+        /// Returns the, from the user, provided password which also being confirmed twice and compared.
+        /// </summary>
+        /// <returns></returns>
+        private static string GetAndVerifyPassword()
+        {
+            Console.Write("Password: ");
+            string password = GetPassword();
+
+            Console.Write("Confirm password: ");
+            string password2 = GetPassword();
+
+            while (!password.Equals(password2))
+            {
+                Console.WriteLine("Wrong password\nRetry again\nConfirm password: ");
+                password2 = GetPassword();
+            }
+
+            return password;
         }
     }
 }
