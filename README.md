@@ -1,15 +1,15 @@
-# Encryption
+# Bluecrypt
 
 # Getting started
 - Install the [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
 - Clone the repository
 ```
-git clone https://github.com/BlauFx/Encryption.git
+git clone https://github.com/BlauFx/Bluecrypt.git
 ```
 
 build and run:
 ```
-dotnet run --project Encryption
+dotnet run --project Bluecrypt
 ```
 # Parameters
 

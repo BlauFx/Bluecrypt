@@ -4,8 +4,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Reflection;
 
-namespace Encryption
+namespace Bluecrypt
 {
     internal class Program
     {
@@ -15,7 +16,9 @@ namespace Encryption
 
         private static Aes Aes = Aes.Create();
         private static bool UseHashChecker;
-        
+
+        private static Version version = Assembly.GetExecutingAssembly().GetName().Version;
+
         private static void Main(string[] args)
         {
             //Generate hash and save it in a text file.
@@ -23,7 +26,12 @@ namespace Encryption
                 GenerateHash();
             else if (args.Contains("--hash"))
                 UseHashChecker = true;
-            
+            else if (args.Contains("--version") || args.Contains("-v"))
+            {
+                Console.WriteLine($"Current version is {version.Major}.{version.Minor}.{version.Build}");
+                Environment.Exit(0);
+            }
+
             var password = GetAndVerifyPassword();
 
             Console.Clear();
@@ -40,7 +48,7 @@ namespace Encryption
             input == "1" ? EncryptFile(inputfile, password) : DecryptFile(inputfile, Console.ReadLine());
             Aes.Clear();
 
-            Console.WriteLine($"Done, operation completed\nAlgorithm: AES\nKeysize: {Aes.Key.Length*8}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
+            Console.WriteLine($"Done, operation completed!\nVersion of Bluecrypt: {version.Major}.{version.Minor}.{version.Build}\nAES\nKeysize: {Aes.Key.Length*8}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
             Console.ReadLine();
         }
 
@@ -107,7 +115,7 @@ namespace Encryption
 
             if (!File.Exists(inputfile) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 inputfile = inputfile[..^1];
-            
+
             if (inputfile.EndsWith("\"") || inputfile.EndsWith("\'"))
                 inputfile = inputfile[..^1];
 
