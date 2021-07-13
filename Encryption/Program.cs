@@ -37,14 +37,7 @@ namespace Encryption
             EnsureFileExist(ref inputfile);
             CheckHash(password);
 
-            if (input == "1")
-                EncryptFile(inputfile, password);
-            else if (input == "2")
-            {
-                Console.Write("Outputfile: ");
-                DecryptFile(inputfile, Console.ReadLine(), password);
-            }
-
+            input == "1" ? EncryptFile(inputfile, password) : DecryptFile(inputfile, Console.ReadLine());
             Aes.Clear();
 
             Console.WriteLine($"Done, operation completed\nAlgorithm: AES\nKeysize: {Aes.Key.Length*8}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
@@ -75,6 +68,7 @@ namespace Encryption
 
         private static void DecryptFile(string inputFile, string outputFile, string password)
         {
+            Console.Write("Outputfile: ");
             CheckIfEnoughStorageIsAvailable(inputFile, outputFile);
 
             using FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
