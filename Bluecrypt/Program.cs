@@ -45,7 +45,13 @@ namespace Bluecrypt
             EnsureFileExist(ref inputfile);
             CheckHash(password);
 
-            input == "1" ? EncryptFile(inputfile, password) : DecryptFile(inputfile, Console.ReadLine());
+            if (input == "1")
+                EncryptFile(inputfile, password);
+            else if (input == "2")
+            {
+                Console.Write("Outputfile: ");
+                DecryptFile(inputfile, Console.ReadLine(), password);
+            }
             Aes.Clear();
 
             Console.WriteLine($"Done, operation completed!\nVersion of Bluecrypt: {version.Major}.{version.Minor}.{version.Build}\nAES\nKeysize: {Aes.Key.Length*8}\nCipherMode: {Aes.Mode}\nPadding: {Aes.Padding}");
@@ -76,7 +82,6 @@ namespace Bluecrypt
 
         private static void DecryptFile(string inputFile, string outputFile, string password)
         {
-            Console.Write("Outputfile: ");
             CheckIfEnoughStorageIsAvailable(inputFile, outputFile);
 
             using FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
