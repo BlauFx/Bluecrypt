@@ -361,4 +361,4 @@ FodyWeavers.xsd
 
 # Rider
 .idea/*
-.vscoce/*
+.vscode/*
