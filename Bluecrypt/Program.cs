@@ -67,8 +67,14 @@ namespace Bluecrypt
                     rng.GetBytes(salt);
 
             Rfc2898DeriveBytes mykey = GetKey(password);
+            using FileStream fsIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
 
-            using (FileStream fsIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
+            if (inputFile.EndsWith("encrypted"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                throw new Exception($"{inputFile} already exists! Please rename it or choose another name!");
+            }
+
             using (FileStream fsCrypt = new FileStream($"{inputFile}.encrypted", FileMode.Create))
             {
                 AddParametersToAes(Aes, mykey);
